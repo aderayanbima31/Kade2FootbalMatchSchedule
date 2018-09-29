@@ -10,6 +10,7 @@ import android.widget.LinearLayout
 import com.kade.derayanbimaalamsyah.kade_2_footbalmatchschedule.R
 import com.kade.derayanbimaalamsyah.kade_2_footbalmatchschedule.R.color.colorPrimary
 import com.kade.derayanbimaalamsyah.kade_2_footbalmatchschedule.R.color.colorWhite
+import com.kade.derayanbimaalamsyah.kade_2_footbalmatchschedule.view.favorite.FavoriteFragment
 import com.kade.derayanbimaalamsyah.kade_2_footbalmatchschedule.view.next_match.NextMatchFragment
 import com.kade.derayanbimaalamsyah.kade_2_footbalmatchschedule.view.next_match.PrevMatchFragment
 import org.jetbrains.anko.*
@@ -89,6 +90,12 @@ class MainActivity : AppCompatActivity() {
             R.id.navigation_next_league -> {
                 val nextFragment = NextMatchFragment.nextMatchInstance()
                 addFragment(nextFragment)
+                return@OnNavigationItemSelectedListener true
+            }
+
+            R.id.navigation_favorites ->{
+                val favoFragment = FavoriteFragment.favoriteInstance()
+                addFragment(favoFragment)
                 return@OnNavigationItemSelectedListener true
             }
         }

@@ -27,6 +27,8 @@ import com.kade.derayanbimaalamsyah.kade_2_footbalmatchschedule.R.string.*
 import com.kade.derayanbimaalamsyah.kade_2_footbalmatchschedule.base_api.ApiRequest
 import com.kade.derayanbimaalamsyah.kade_2_footbalmatchschedule.model.Event
 import com.kade.derayanbimaalamsyah.kade_2_footbalmatchschedule.model.Team
+import com.kade.derayanbimaalamsyah.kade_2_footbalmatchschedule.model.database.FavoriteParamsDatabase
+import com.kade.derayanbimaalamsyah.kade_2_footbalmatchschedule.utils.db
 import com.kade.derayanbimaalamsyah.kade_2_footbalmatchschedule.utils.gone
 import com.kade.derayanbimaalamsyah.kade_2_footbalmatchschedule.utils.visible
 import com.squareup.picasso.Picasso
@@ -79,6 +81,10 @@ class DetailMatchActivity: AppCompatActivity(), DetailMatchView {
 
     private lateinit var presenter: DetailMatchPresenter
     private lateinit var idEventDetail: String
+
+    private var isFavorite: Boolean = false
+    private var menuItem: Menu? = null
+
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -482,6 +488,7 @@ class DetailMatchActivity: AppCompatActivity(), DetailMatchView {
 
     private fun getEventDetail() {
 
+        favoriteState()
         presenter = DetailMatchPresenter(this, ApiRequest(), Gson())
         presenter.getEventDetailMatch(idEventDetail, itemHomeId, itemAwayId)
 
@@ -491,11 +498,11 @@ class DetailMatchActivity: AppCompatActivity(), DetailMatchView {
     }
 
     private fun setPlayerTeam(playerName: String?): String? {
-        val bulkPlayer = playerName?.split(";".toRegex())?.dropLastWhile {
+        val regexPlayer = playerName?.split(";".toRegex())?.dropLastWhile {
             it.isEmpty()
         }?.map { it.trim() }?.toTypedArray()?.joinToString("\n")
 
-        return bulkPlayer
+        return regexPlayer
     }
 
     override fun hideLoading() {
@@ -521,6 +528,13 @@ class DetailMatchActivity: AppCompatActivity(), DetailMatchView {
         finish()
     }
 
+    override fun onCreateOptionsMenu(menu: Menu?): Boolean {
+        menuInflater.inflate(R.menu.favorite_menu, menu)
+        menuItem = menu
+        setFavorite()
+        return true
+    }
+
     override fun onOptionsItemSelected(item: MenuItem?): Boolean {
         return when (item?.itemId) {
             android.R.id.home -> {
@@ -528,8 +542,69 @@ class DetailMatchActivity: AppCompatActivity(), DetailMatchView {
                 true
             }
 
+            R.id.add_to_favorite ->{
+                if (isFavorite) removeFromFavorite() else addToFavorite()
+                isFavorite = !isFavorite
+                setFavorite()
+                true
+            }
+
 
             else -> super.onOptionsItemSelected(item)
+        }
+    }
+
+    private fun favoriteState(){
+        db.use {
+            val result = select(FavoriteParamsDatabase.TABLE_FAVORITE)
+                    .whereArgs("EVENT_ID = {id}",
+                    "id" to idEventDetail)
+
+            val favorite = result.parseList(classParser<FavoriteParamsDatabase>())
+            if (!favorite.isEmpty()) isFavorite = true
+        }
+    }
+
+    private fun setFavorite() {
+
+        if (isFavorite){
+            menuItem?.getItem(0)?.icon = ContextCompat.getDrawable(this, R.drawable.ic_added_to_favorites)
+        }
+        else{
+            menuItem?.getItem(0)?.icon = ContextCompat.getDrawable(this, R.drawable.ic_add_to_favorites)
+        }
+
+    }
+
+    private fun addToFavorite() {
+        try {
+            db.use {
+                insert(FavoriteParamsDatabase.TABLE_FAVORITE, FavoriteParamsDatabase.EVENT_ID to  eventDetail.idEvent,
+                        FavoriteParamsDatabase.EVENT_TIME to eventDetail.dateEvent,
+                        FavoriteParamsDatabase.HOME_TEAM to eventDetail.strHomeTeam,
+                        FavoriteParamsDatabase.HOME_SCORE to eventDetail.intHomeScore,
+                        FavoriteParamsDatabase.AWAY_TEAM to eventDetail.strAwayTeam,
+                        FavoriteParamsDatabase.AWAY_SCORE to eventDetail.intAwayScore,
+                        FavoriteParamsDatabase.HOME_TEAM_ID to itemHomeId,
+                        FavoriteParamsDatabase.AWAY_TEAM_ID to itemAwayId)
+            }
+            snackbar(swipeRefresh, "Added to Favorite").show()
+        } catch (e: SQLiteConstraintException) {
+            snackbar(swipeRefresh, e.localizedMessage).show()
+        }
+
+    }
+
+    private fun removeFromFavorite() {
+        try {
+            db.use {
+                delete(FavoriteParamsDatabase.TABLE_FAVORITE, "(EVENT_ID = {id})",
+                        "id" to idEventDetail)
+            }
+            snackbar(swipeRefresh, "Removed to Favorite").show()
+        } catch (e: SQLiteConstraintException) {
+            snackbar(swipeRefresh, e.localizedMessage).show()
+
         }
     }
 

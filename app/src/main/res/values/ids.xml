@@ -15,4 +15,5 @@
     <item name="bottom_layout" type="id" />
     <item name="progressBarDetailEvent" type="id" />
     <item name="lyEventDetail" type="id" />
+    <item name="imgView" type="id">id</item>
 </resources>
