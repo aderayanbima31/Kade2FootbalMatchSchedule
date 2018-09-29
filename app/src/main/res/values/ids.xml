@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <item name="navigation" type="id" />
+    <item name="text_schedule" type="id" />
+    <item name="text_hometeam" type="id" />
+    <item name="text_homescore" type="id" />
+    <item name="text_versus" type="id" />
+    <item name="textawayscore" type="id" />
+    <item name="text_awayteam" type="id" />
+    <item name="swipeRefresh" type="id" />
+    <item name="recycleViewPrevMatch" type="id" />
+    <item name="progressBarPrevMatch" type="id" />
+    <item name="recycleViewNextMatch" type="id" />
+    <item name="progressBarNextMatch" type="id" />
+    <item name="bottom_layout" type="id" />
+    <item name="progressBarDetailEvent" type="id" />
+    <item name="lyEventDetail" type="id" />
+</resources>
